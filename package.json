@@ -4,7 +4,7 @@
   "description": "API Application to organize courses ",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1", 
+    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon index.js"
   },
   "author": "Youssef",
@@ -13,6 +13,7 @@
     "nodemon": "^3.1.14"
   },
   "dependencies": {
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "express-validator": "^7.3.2"
   }
 }
