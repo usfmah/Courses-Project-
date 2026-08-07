@@ -12,6 +12,4 @@ let courses = [
     },
 ]
 
-module.exports = {
-    courses
-}
+module.exports = courses
