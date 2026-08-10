@@ -1,31 +1,32 @@
-const courses = require('../data/data')
+const Course = require('../models/coursesModels.js');
 const {validationResult} = require('express-validator'); 
 
 
-const findCourseIndexOr404 = (req, res) => {
-    const courseId = +req.params.courseId; 
-    const idx = courses.findIndex((c) => c.id === courseId);
 
-    if (idx === -1) res.status(404).json({msg: "course not found"});
-    return idx;
-}
-
-const getAllCourses = (req, res) => {
+const getAllCourses = async (req, res) => {
+    const courses = await Course.find();
     res.json(courses);
 }
 
 
-const getSingleCourse = (req, res) => {
+const getSingleCourse = async (req, res) => {
 
-    const idx = findCourseIndexOr404(req, res);
-    if (idx === -1) return;
+    try {
+            const course = await Course.findById(req.params.courseId);
+            if (!course) {
+            return res.status(404).json({msg: 'Course not found'});
+            }
+            res.json(course);
+        }
+        catch (err) {
+            return res.status(400).json('invalid Course Id');
 
-    res.json(courses[idx]);
+        }
 
 }
 
 
-const createCourses = (req, res) => {
+const createCourses = async (req, res) => {
 
     const errors = validationResult(req);
     console.log('errors: ', errors); 
@@ -33,34 +34,44 @@ const createCourses = (req, res) => {
     if (!errors.isEmpty()){
        return res.status(400).json(errors.array());
     }
+    
+    const newCourse = new Course(req.body);
 
-    console.log(req.body);
+    await newCourse.save();
 
-    const course = {id: courses.length + 1, ...req.body};
-    courses.push(course);
-
-    res.status(201).json(course);
+    res.status(201).json(newCourse);
 
     
 }
 
 
-const updateCourses = (req, res) => {
-    const idx = findCourseIndexOr404(req, res);
-    if (idx === -1) return;
-
-    courses[idx] = {...courses[idx], ...req.body};
-    res.status(200).json(courses[idx]);
+const updateCourses = async (req, res) => {
+    const courseId = req.params.courseId; 
+    try {
+    const course = await Course.findByIdAndUpdate(courseId, req.body, { new: true });
+    if (!course) {
+        return res.status(404).json({msg: 'Course not found'});
+    }
+   return res.status(200).json(course);
+    }
+    catch (err) {
+        return res.status(400).json({error: err}); 
+    }
 
 }
 
 
-const deleteCourses = (req, res) => {
-    const idx = findCourseIndexOr404(req, res);
-    if (idx === -1) return;
-
-    courses.splice(idx, 1);
-    res.status(200).json({msg: 'done'})
+const deleteCourses = async (req, res) => {
+    try {
+        const course = await Course.findByIdAndDelete(req.params.courseId);
+        if (!course) {
+            return res.status(404).json({msg: 'Course not found'});
+        }
+        res.status(200).json({msg: 'done'})
+    }
+    catch (err) {
+        return res.status(400).json({error: err});
+    }
 
 }
 

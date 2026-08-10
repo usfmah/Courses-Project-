@@ -10,7 +10,7 @@ const validationSchema = () => {
 
         body('price')
             .notEmpty()
-            .withMessage("title is required")
+            .withMessage("price is required")
             .isLength({min: 2}).
             withMessage('cannot be less than 2 digits')]
 }
