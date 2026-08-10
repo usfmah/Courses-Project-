@@ -1,11 +1,16 @@
 const Course = require('../models/coursesModels.js');
 const {validationResult} = require('express-validator'); 
-
+const httpStatusText = require('../utils/httpStatusText.js');
 
 
 const getAllCourses = async (req, res) => {
-    const courses = await Course.find();
-    res.json(courses);
+    try {
+        const courses = await Course.find({}, {"__v": false});
+        res.json({status: httpStatusText.SUCCESS, data: {courses}});
+    }
+    catch (err) {
+        return res.status(400).json({status: httpStatusText.ERROR, data: null, message: err.message, code: 400});
+    }
 }
 
 
@@ -14,12 +19,12 @@ const getSingleCourse = async (req, res) => {
     try {
             const course = await Course.findById(req.params.courseId);
             if (!course) {
-            return res.status(404).json({msg: 'Course not found'});
+            return res.status(404).json({status: httpStatusText.FAIL, data: {course: null}});
             }
-            res.json(course);
+            res.json({status: httpStatusText.SUCCESS, data: {course}});
         }
         catch (err) {
-            return res.status(400).json('invalid Course Id');
+            return res.status(400).json({status: httpStatusText.ERROR, data: null, message: err.message, code: 400});
 
         }
 
@@ -29,17 +34,21 @@ const getSingleCourse = async (req, res) => {
 const createCourses = async (req, res) => {
 
     const errors = validationResult(req);
-    console.log('errors: ', errors); 
 
     if (!errors.isEmpty()){
-       return res.status(400).json(errors.array());
+       return res.status(400).json({status: httpStatusText.FAIL, data: {errors: errors.array()}});
     }
     
-    const newCourse = new Course(req.body);
+    try {
+        const newCourse = new Course(req.body);
 
-    await newCourse.save();
+        await newCourse.save();
 
-    res.status(201).json(newCourse);
+        res.status(201).json({status: httpStatusText.SUCCESS, data: {course: newCourse}});
+    }
+    catch (err) {
+        return res.status(400).json({status: httpStatusText.ERROR, data: null, message: err.message, code: 400});
+    }
 
     
 }
@@ -50,12 +59,12 @@ const updateCourses = async (req, res) => {
     try {
     const course = await Course.findByIdAndUpdate(courseId, req.body, { new: true });
     if (!course) {
-        return res.status(404).json({msg: 'Course not found'});
+        return res.status(404).json({status: httpStatusText.FAIL, data: null});
     }
-   return res.status(200).json(course);
+   return res.status(200).json({status: httpStatusText.SUCCESS, data: {course}});
     }
     catch (err) {
-        return res.status(400).json({error: err}); 
+        return res.status(400).json({status: httpStatusText.ERROR, data: null, message: err.message, code: 400}); 
     }
 
 }
@@ -65,12 +74,12 @@ const deleteCourses = async (req, res) => {
     try {
         const course = await Course.findByIdAndDelete(req.params.courseId);
         if (!course) {
-            return res.status(404).json({msg: 'Course not found'});
+            return res.status(404).json({status: httpStatusText.FAIL, data: null});
         }
-        res.status(200).json({msg: 'done'})
+        res.status(200).json({status: httpStatusText.SUCCESS, data: null})
     }
     catch (err) {
-        return res.status(400).json({error: err});
+        return res.status(400).json({status: httpStatusText.ERROR, data: null, message: err.message, code: 400});
     }
 
 }
