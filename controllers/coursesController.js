@@ -4,13 +4,20 @@ const httpStatusText = require('../utils/httpStatusText.js');
 
 
 const getAllCourses = async (req, res) => {
+
+    const query = req.query; 
+    const limit = parseInt(query.limit, 10) || 10; 
+    const page = parseInt(query.page, 10) || 1; 
+    const skip = (page - 1) * limit; 
+
     try {
-        const courses = await Course.find({}, {"__v": false});
+        const courses = await Course.find({}, {"__v": false}).limit(limit).skip(skip);
         res.json({status: httpStatusText.SUCCESS, data: {courses}});
     }
     catch (err) {
         return res.status(400).json({status: httpStatusText.ERROR, data: null, message: err.message, code: 400});
     }
+    
 }
 
 
