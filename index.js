@@ -8,6 +8,8 @@ const router = require('./routes/routes')
 
 const httpStatusText = require('./utils/httpStatusText');
 
+const cors = require('cors'); 
+
 const mongoose = require('mongoose');
 
 mongoose.connect(process.env.DB_URL).then(() => {
@@ -15,6 +17,9 @@ mongoose.connect(process.env.DB_URL).then(() => {
   }).catch((err) => {
     console.log('mongodb connection error: ', err.message);
   });
+
+app.use(cors());
+ 
 app.use(express.json())
 
 
