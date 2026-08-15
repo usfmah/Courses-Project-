@@ -2,6 +2,7 @@ const user = require('../models/userModel');
 const httpStatusText = require('../utils/httpStatusText');
 const asyncWrapper = require('../middlewares/asyncWrapper');
 const AppError = require('../utils/appError');
+const bcrypt = require('bcryptjs')
 
 const getAllusers = asyncWrapper (async (req, res, next) => {
 
@@ -28,11 +29,13 @@ const register = asyncWrapper (async (req, res, next) => {
             return next(error);
     }
 
+    const hashedPassword = bcrypt.hash(password, 10);
+
     const newUser = new user({
         firstName,
         lastName,
         email,
-        password
+        password: hashedPassword
     })
 
     await newUser.save(); 
