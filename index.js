@@ -26,12 +26,16 @@ app.use(express.json())
 app.use('/api/courses', router)
 
 
-app.all('*', (req, res) => {
+app.all('*', (req, res, next) => {
       
     return res.status(404).json({status: httpStatusText.ERROR, message: "This resourse is not avilable"});
   
-})
+});
 
+
+app.all((error, req, res, next) => {
+        res.status(error.statusCode || 500).json({status: httpStatusText.ERROR, message: error.message})
+});
 
 
 
