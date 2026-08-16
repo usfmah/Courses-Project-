@@ -2,7 +2,7 @@ const user = require('../models/userModel');
 const httpStatusText = require('../utils/httpStatusText');
 const asyncWrapper = require('../middlewares/asyncWrapper');
 const AppError = require('../utils/appError');
-const bcrypt = require('bcryptjs')
+const bcrypt = require('bcryptjs');
 
 const getAllusers = asyncWrapper (async (req, res, next) => {
 
@@ -29,7 +29,7 @@ const register = asyncWrapper (async (req, res, next) => {
             return next(error);
     }
 
-    const hashedPassword = bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new user({
         firstName,
@@ -46,7 +46,35 @@ const register = asyncWrapper (async (req, res, next) => {
 )
 
 
-const login =  ()  => {}
+const login = asyncWrapper(async (req, res, next)  => {
+
+    const {email, password} = req.body; 
+
+
+    if (!email || !password) {
+
+        const error = new AppError("passowrd and email are required", 400, httpStatusText.FAIL);
+        return next(error);
+    }
+
+    const user = await user.findOne({email: email}); 
+
+    if (!user) {
+
+        const error = new AppError("user not found", 400, httpStatusText.FAIL);
+        return next(error);
+    }
+
+    const matchedPassword = await bcrypt.compare(password, user.password);
+
+
+    if (user && matchedPassword) {
+        res.status(201).json({status: httpStatusText.SUCCESS, data: {user: "logged in successfully"}});
+    } else {
+        const error = new AppError("Something wrong", 400, httpStatusText.FAIL);
+        return next(error);
+    }
+})
 
 
 
