@@ -3,6 +3,10 @@ const httpStatusText = require('../utils/httpStatusText');
 const asyncWrapper = require('../middlewares/asyncWrapper');
 const AppError = require('../utils/appError');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const generateJWT = require('../utils/JWTFunction');
+require('dotenv').config();
+
 
 const getAllusers = asyncWrapper (async (req, res, next) => {
 
@@ -40,6 +44,9 @@ const register = asyncWrapper (async (req, res, next) => {
 
     await newUser.save(); 
 
+    const token = await generateJWT({email: newUser.email, id: newUser.id});
+        newUser.token = token; 
+        newUser.password = undefined;
         res.status(201).json({status: httpStatusText.SUCCESS, data: {user: newUser}});
     
 }
@@ -57,22 +64,29 @@ const login = asyncWrapper(async (req, res, next)  => {
         return next(error);
     }
 
-    const user = await user.findOne({email: email}); 
+    const User = await user.findOne({email: email}).select('+password'); 
 
-    if (!user) {
+    if (!User) {
 
         const error = new AppError("user not found", 400, httpStatusText.FAIL);
         return next(error);
     }
 
-    const matchedPassword = await bcrypt.compare(password, user.password);
+    const matchedPassword = await bcrypt.compare(password, User.password);
 
 
-    if (user && matchedPassword) {
-        res.status(201).json({status: httpStatusText.SUCCESS, data: {user: "logged in successfully"}});
-    } else {
+    if (User && matchedPassword) {
+        
+        const token = await generateJWT({email: User.email, id: User.id});
+
+        res.status(200).json({status: httpStatusText.SUCCESS, data: {token}});
+    } 
+    else {
+
         const error = new AppError("Something wrong", 400, httpStatusText.FAIL);
+
         return next(error);
+
     }
 })
 
