@@ -24,7 +24,7 @@ const getAllusers = asyncWrapper (async (req, res, next) => {
 
 const register = asyncWrapper (async (req, res, next) => {
 
-    const {firstName, lastName, email, password} = req.body;
+    const {firstName, lastName, email, password, role} = req.body;
 
     const oldUser = await user.findOne({email: email}); 
 
@@ -39,7 +39,8 @@ const register = asyncWrapper (async (req, res, next) => {
         firstName,
         lastName,
         email,
-        password: hashedPassword
+        password: hashedPassword, 
+        role
     })
 
     await newUser.save(); 
