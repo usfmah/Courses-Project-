@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const validator = require('validator');
 const userRoles = require('../utils/userRoles');
-
 const userSchema = new Schema ({
 
     firstName: {
@@ -35,6 +34,11 @@ const userSchema = new Schema ({
         type: String,
         enum: [userRoles.user, userRoles.admin, userRoles.manager],
         default: userRoles.user
+    }, 
+
+    avatat: {
+        type: String, 
+        default: 'uploads/images.jpeg', 
     }
 
 }, { versionKey: false })
