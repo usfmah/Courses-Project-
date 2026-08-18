@@ -10,11 +10,12 @@ const verifyToken = (req, res, next) => {
          return next(error);
     }
 
-    const token = authHeader.split(' ')[1];
+const token = authHeader.split(' ')[1];
 
     try {
-    const decodedToken = JWT.verify(token, process.env.JWT_SECRET_KEY, )
-    next();
+        const decodedToken = JWT.verify(token, process.env.JWT_SECRET_KEY, )
+        req.currentUser = decodedToken;
+        next();
 
     } 
     catch (err) {
