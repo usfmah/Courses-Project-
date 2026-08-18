@@ -3,6 +3,16 @@ const multer = require('multer');
 const userController = require('../controllers/usersController')
 const router = express.Router();
 const verifyToken = require('../middlewares/verifyToken');
+const AppError = require('../utils/appError');
+const httpStatusText = require('../utils/httpStatusText');
+
+const fileFilter = (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+        cb(null, true);
+    } else {
+        cb(new AppError('Only images are allowed to be uploaded', 400, httpStatusText.FAIL), false);
+    }
+}
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -15,7 +25,7 @@ const storage = multer.diskStorage({
     }
 })
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage: storage, fileFilter });
 
 router.route('/')
                 .get(verifyToken, userController.getAllusers);
