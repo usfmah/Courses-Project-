@@ -39,7 +39,8 @@ const register = asyncWrapper (async (req, res, next) => {
         firstName,
         lastName,
         email,
-        password: hashedPassword
+        password: hashedPassword,
+        avatar: req.file ? req.file.filename : undefined
     })
 
     await newUser.save(); 

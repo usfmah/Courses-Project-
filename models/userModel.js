@@ -36,7 +36,7 @@ const userSchema = new Schema ({
         default: userRoles.user
     }, 
 
-    avatat: {
+    avatar: {
         type: String, 
         default: 'uploads/images.jpeg', 
     }
