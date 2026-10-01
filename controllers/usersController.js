@@ -61,7 +61,7 @@ const login = asyncWrapper(async (req, res, next)  => {
 
     if (!email || !password) {
 
-        const error = new AppError("passowrd and email are required", 400, httpStatusText.FAIL);
+        const error = new AppError("password and email are required", 400, httpStatusText.FAIL);
         return next(error);
     }
 

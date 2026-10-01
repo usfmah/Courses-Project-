@@ -48,11 +48,27 @@ app.use('/api/users', usersRouter)
 
 app.use((req, res, next) => {
     
-    return res.status(404).json({status: httpStatusText.ERROR, message: "This resourse is not avilable"});
+    return res.status(404).json({status: httpStatusText.FAIL, data: null, message: "This resource is not available"});
   
 });
 
 
 app.use((error, req, res, next) => {
-        res.status(error.statusCode || 500).json({status: httpStatusText.ERROR, message: error.message})
+        if (error.name === 'CastError') {
+            return res.status(400).json({status: httpStatusText.FAIL, data: null, message: 'Invalid id format'});
+        }
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({status: httpStatusText.FAIL, data: null, message: error.message});
+        }
+        if (error.code && error.code === 11000) {
+            return res.status(409).json({status: httpStatusText.FAIL, data: null, message: 'Duplicate field value entered'});
+        }
+        if (error.statusCode) {
+            const statusCode = error.statusCode;
+            if (statusCode >= 500) {
+                return res.status(500).json({status: httpStatusText.ERROR, data: null, message: 'Internal server error'});
+            }
+            return res.status(statusCode).json({status: error.statusText || httpStatusText.FAIL, data: null, message: error.message});
+        }
+        return res.status(500).json({status: httpStatusText.ERROR, data: null, message: 'Internal server error'});
 });
