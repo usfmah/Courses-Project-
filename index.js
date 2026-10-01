@@ -1,5 +1,13 @@
 require('dotenv').config();
 
+if (!process.env.JWT_SECRET_KEY) {
+    throw new Error('JWT_SECRET_KEY is missing — copy .env.example to .env and set JWT_SECRET_KEY');
+}
+
+if (!process.env.DB_URL) {
+    throw new Error('DB_URL is missing — copy .env.example to .env and set DB_URL');
+}
+
 const express = require ('express');
 const path = require('path')
 const app = express();
@@ -20,8 +28,12 @@ const mongoose = require('mongoose');
 
 mongoose.connect(process.env.DB_URL).then(() => {
     console.log('mongodb server started')
+    app.listen(process.env.PORT || 3000, () => {
+        console.log(`listen on port ${process.env.PORT || 3000}`)
+    })
   }).catch((err) => {
     console.log('mongodb connection error: ', err.message);
+    process.exit(1);
   });
 
 app.use(cors());
@@ -44,9 +56,3 @@ app.use((req, res, next) => {
 app.use((error, req, res, next) => {
         res.status(error.statusCode || 500).json({status: httpStatusText.ERROR, message: error.message})
 });
-
-
-
-app.listen(process.env.PORT || 3000, () => {
-    console.log(`listen on port ${process.env.PORT || 3000}`)
-})
