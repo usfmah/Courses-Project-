@@ -23,6 +23,8 @@ const usersRouter = require('./routes/usersRoute')
 const httpStatusText = require('./utils/httpStatusText');
 
 const cors = require('cors'); 
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 
 const mongoose = require('mongoose');
 
@@ -36,9 +38,40 @@ mongoose.connect(process.env.DB_URL).then(() => {
     process.exit(1);
   });
 
-app.use(cors());
+app.use(helmet());
+
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim()).filter(Boolean)
+    : null;
+
+if (allowedOrigins && allowedOrigins.length) {
+    app.use(cors({origin: allowedOrigins}));
+} else if (process.env.NODE_ENV === 'production') {
+    app.use(cors({origin: false}));
+} else {
+    app.use(cors());
+}
  
 app.use(express.json())
+
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: {status: httpStatusText.FAIL, data: null, message: 'Too many login attempts, please try again later'},
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+const registerLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 20,
+    message: {status: httpStatusText.FAIL, data: null, message: 'Too many registration attempts, please try again later'},
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+app.use('/api/users/login', loginLimiter);
+app.use('/api/users/register', registerLimiter);
 
 
 app.use('/api/courses', coursesRouter);
@@ -54,6 +87,9 @@ app.use((req, res, next) => {
 
 
 app.use((error, req, res, next) => {
+        if (error.name === 'MulterError') {
+            return res.status(400).json({status: httpStatusText.FAIL, data: null, message: error.message});
+        }
         if (error.name === 'CastError') {
             return res.status(400).json({status: httpStatusText.FAIL, data: null, message: 'Invalid id format'});
         }

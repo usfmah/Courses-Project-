@@ -14,7 +14,7 @@ const getAllusers = asyncWrapper (async (req, res, next) => {
     const page = req.query.page ?? 1; 
     const skip = (page - 1) * limit; 
 
-    const users = await user.find({}, {"__v": false}).limit(limit).skip(skip);
+    const users = await user.find({}, {password: 0, token: 0, __v: 0}).limit(limit).skip(skip);
     res.json({status: httpStatusText.SUCCESS, data: {users}});
 
 }
@@ -45,9 +45,9 @@ const register = asyncWrapper (async (req, res, next) => {
     await newUser.save(); 
 
     const token = await generateJWT({email: newUser.email, id: newUser.id, role: newUser.role});
-        newUser.token = token; 
-        newUser.password = undefined;
-        res.status(201).json({status: httpStatusText.SUCCESS, data: {user: newUser}});
+        const userObj = newUser.toObject();
+        delete userObj.password;
+        res.status(201).json({status: httpStatusText.SUCCESS, data: {user: userObj, token}});
     
 }
 )
@@ -78,8 +78,10 @@ const login = asyncWrapper(async (req, res, next)  => {
     if (User && matchedPassword) {
         
         const token = await generateJWT({email: User.email, id: User.id, role: User.role});
+        const userObj = User.toObject();
+        delete userObj.password;
 
-        res.status(200).json({status: httpStatusText.SUCCESS, data: {token}});
+        res.status(200).json({status: httpStatusText.SUCCESS, data: {user: userObj, token}});
     } 
     else {
 

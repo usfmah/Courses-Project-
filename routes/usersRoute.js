@@ -5,6 +5,8 @@ const validate = require('../middlewares/validate');
 const userController = require('../controllers/usersController')
 const router = express.Router();
 const verifyToken = require('../middlewares/verifyToken');
+const allowedTo = require('../middlewares/allowedTo');
+const userRoles = require('../utils/userRoles');
 const AppError = require('../utils/appError');
 const httpStatusText = require('../utils/httpStatusText');
 
@@ -39,15 +41,26 @@ const storage = multer.diskStorage({
     },
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-        const ext = file.originalname.split('.').pop()
+        const mimeExtensionMap = {
+            'image/jpeg': 'jpg',
+            'image/png': 'png',
+            'image/gif': 'gif',
+            'image/webp': 'webp',
+            'image/bmp': 'bmp',
+            'image/svg+xml': 'svg',
+            'image/tiff': 'tiff',
+            'image/x-icon': 'ico',
+            'image/vnd.microsoft.icon': 'ico'
+        };
+        const ext = mimeExtensionMap[file.mimetype] || 'png';
         cb(null, file.fieldname + '-' + uniqueSuffix + '.' + ext)
     }
 })
 
-const upload = multer({ storage: storage, fileFilter });
+const upload = multer({ storage: storage, fileFilter, limits: { fileSize: 2 * 1024 * 1024, files: 1 } });
 
 router.route('/')
-                .get(verifyToken, paginationRules, validate, userController.getAllusers);
+                .get(verifyToken, allowedTo(userRoles.admin), paginationRules, validate, userController.getAllusers);
 
 
 
