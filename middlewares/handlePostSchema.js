@@ -5,14 +5,18 @@ const validationSchema = () => {
  return  [body('title')
             .notEmpty()
             .withMessage("title is required")
-            .isLength({min: 2}).
-            withMessage('cannot be less than 2 digits'),
+            .isString()
+            .withMessage("title must be a string")
+            .trim()
+            .notEmpty()
+            .withMessage("title is required"),
 
         body('price')
             .notEmpty()
             .withMessage("price is required")
-            .isLength({min: 2}).
-            withMessage('cannot be less than 2 digits')]
+            .isFloat({gt: 0})
+            .withMessage('price must be a positive number')
+            .toFloat()]
 }
 
 module.exports = validationSchema

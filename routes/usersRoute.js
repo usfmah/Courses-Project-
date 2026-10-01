@@ -1,10 +1,29 @@
 const express = require('express'); 
 const multer = require('multer');
+const {body, query} = require('express-validator');
+const validate = require('../middlewares/validate');
 const userController = require('../controllers/usersController')
 const router = express.Router();
 const verifyToken = require('../middlewares/verifyToken');
 const AppError = require('../utils/appError');
 const httpStatusText = require('../utils/httpStatusText');
+
+const registerValidation = [
+    body('firstName').notEmpty().withMessage('firstName is required'),
+    body('lastName').notEmpty().withMessage('lastName is required'),
+    body('email').isEmail().withMessage('Invalid email format'),
+    body('password').isLength({min: 8}).withMessage('password must be at least 8 characters')
+];
+
+const loginValidation = [
+    body('email').isEmail().withMessage('Invalid email format'),
+    body('password').notEmpty().withMessage('password is required')
+];
+
+const paginationRules = [
+    query('page').optional().isInt({min: 1}).withMessage('page must be an integer >= 1').toInt(),
+    query('limit').optional().isInt({min: 1, max: 100}).withMessage('limit must be an integer between 1 and 100').toInt()
+];
 
 const fileFilter = (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
@@ -28,18 +47,18 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage, fileFilter });
 
 router.route('/')
-                .get(verifyToken, userController.getAllusers);
+                .get(verifyToken, paginationRules, validate, userController.getAllusers);
 
 
 
 router.route('/register')
-                .post(upload.single('avatar'), userController.register)
+                .post(upload.single('avatar'), registerValidation, validate, userController.register)
                 
 
                 
 
 router.route('/login')
-                .post(userController.login)                
+                .post(loginValidation, validate, userController.login)                
 
 
 
