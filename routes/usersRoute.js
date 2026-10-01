@@ -60,7 +60,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage, fileFilter, limits: { fileSize: 2 * 1024 * 1024, files: 1 } });
 
 router.route('/')
-                .get(verifyToken, allowedTo(userRoles.admin), paginationRules, validate, userController.getAllusers);
+                .get(verifyToken, allowedTo(userRoles.admin), paginationRules, validate, userController.getAllUsers);
 
 
 

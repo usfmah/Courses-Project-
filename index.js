@@ -21,6 +21,7 @@ const usersRouter = require('./routes/usersRoute')
 
 
 const httpStatusText = require('./utils/httpStatusText');
+const logger = require('./utils/logger');
 
 const cors = require('cors'); 
 const helmet = require('helmet');
@@ -29,12 +30,12 @@ const rateLimit = require('express-rate-limit');
 const mongoose = require('mongoose');
 
 mongoose.connect(process.env.DB_URL).then(() => {
-    console.log('mongodb server started')
+    logger.info('mongodb server started')
     app.listen(process.env.PORT || 3000, () => {
-        console.log(`listen on port ${process.env.PORT || 3000}`)
+        logger.info(`listen on port ${process.env.PORT || 3000}`)
     })
   }).catch((err) => {
-    console.log('mongodb connection error: ', err.message);
+    logger.error('mongodb connection error: ', err.message);
     process.exit(1);
   });
 

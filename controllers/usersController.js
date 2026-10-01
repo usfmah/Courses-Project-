@@ -3,12 +3,11 @@ const httpStatusText = require('../utils/httpStatusText');
 const asyncWrapper = require('../middlewares/asyncWrapper');
 const AppError = require('../utils/appError');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const generateJWT = require('../utils/JWTFunction');
 require('dotenv').config();
 
 
-const getAllusers = asyncWrapper (async (req, res, next) => {
+const getAllUsers = asyncWrapper (async (req, res, next) => {
 
     const limit = req.query.limit ?? 10; 
     const page = req.query.page ?? 1; 
@@ -95,7 +94,7 @@ const login = asyncWrapper(async (req, res, next)  => {
 
 
 module.exports = {
-    getAllusers,
+    getAllUsers,
     register, 
     login 
 }

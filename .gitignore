@@ -141,3 +141,7 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Uploads (avatars) — ignore contents, keep dir
+uploads/*
+!uploads/.gitkeep

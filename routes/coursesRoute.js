@@ -1,6 +1,6 @@
 const express = require('express'); 
 const {param, query} = require('express-validator');
-const validationSchema = require('../middlewares/handlePostSchema')
+const validationSchema = require('../middlewares/courseValidation')
 const validate = require('../middlewares/validate');
 const router = express.Router();
 const courseController = require('../controllers/coursesController')
