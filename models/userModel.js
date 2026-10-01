@@ -27,9 +27,6 @@ const userSchema = new Schema ({
         select: false
     },
 
-    token: {
-        type: String
-    }, 
     role: {
         type: String,
         enum: [userRoles.user, userRoles.admin, userRoles.manager],
